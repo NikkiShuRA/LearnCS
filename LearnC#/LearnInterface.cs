@@ -26,8 +26,8 @@ public enum PetType
 interface IPet
 {
     PetType Type { get; set; }
-    string? Name { get; set; }
-    string? Description { get; set; }
+    string Name { get; }
+    string? Description { get; }
     PetRarityLevel Rarity { get; set; }
 
     // Счастье
@@ -87,8 +87,8 @@ interface IPet
 class Cat : IPet
 {
     public PetType Type { get; set; } = PetType.Cat;
-    public string? Name { get; set; }
-    public string? Description { get; set; } = "It's a Cat. He (She) likes when you pet it.";
+    public string Name { get; }
+    public string? Description { get; } = "It's a Cat. He (She) likes when you pet it.";
     public PetRarityLevel Rarity { get; set; }
 
     // Счастье
@@ -118,7 +118,7 @@ class Cat : IPet
 class Dog : IPet
 {
     public PetType Type { get; set; } = PetType.Dog;
-    public string? Name { get; set; }
+    public string Name { get; }
     public string? Description { get; set; } = "It's a Dog. He (She) likes when you pet it.";
     public PetRarityLevel Rarity { get; set; }
 
@@ -216,8 +216,8 @@ internal class MyPets
             }
 
             Console.WriteLine("===========================\n" +
-                                "[Add] - Create New Animal\n" +
-                                "[Back] - Back");
+                              "[Add] - Create New Animal\n" +
+                              "[Back] - Back");
 
             var key = Console.ReadLine();
             switch (key?.ToLower())
@@ -410,7 +410,7 @@ internal class MyPets
             Random random = new Random();
             var values = Enum.GetValues(typeof(PetType));
             var diap = values.Length;
-            var typePetObj = values.GetValue(random.Next(diap));
+            var typePetObj = values.GetValue(random.Next(1, diap));
             if (typePetObj is null) continue;
             typePet = (PetType)typePetObj;
             if (typePet != PetType.None) justDoIt = false;
