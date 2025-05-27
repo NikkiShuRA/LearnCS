@@ -7,9 +7,7 @@ class Program
 {
     static void Main()
     {
-        MyPets.CreatePetFinal(PetType.Cat, "Barsik");
-        MyPets.CreatePetFinal(PetType.Dog, "Sharik");
-        MyPets.RunTimer();
+       
         bool close = true;
         while(close)
         {
@@ -28,7 +26,7 @@ class Program
                     break;
 
                 case '2':
-                    MyPets.Menu();
+                    MyPets.StartGame();
                     break;
 
                 case '0':

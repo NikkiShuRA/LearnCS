@@ -84,6 +84,17 @@ interface IPet
     }
 }
 
+interface IChampion
+{
+    int HP { get; set; }
+    int Damage { get; set; }
+}
+
+interface IBusiness
+{
+    int GPM { get; set; }
+}
+
 class Cat : IPet
 {
     public PetType Type { get; set; } = PetType.Cat;
@@ -148,7 +159,20 @@ class Dog : IPet
 
 internal class MyPets
 {
+    static Dictionary<PetRarityLevel, (int chance, ((int minIndependence, int maxIndependence) Independence, (int minGluttony, int maxGluttony) Gluttony) IndAndGlu)> petsRarity = new Dictionary<PetRarityLevel, (int chance, ((int minIndependence, int maxIndependence) Independence, (int minGluttony, int maxGluttony) Gluttony) IndAndGlu)>(); // Тут храним редкости и их диапозон параметров
+
+
     static Dictionary<int, IPet> myPets = new Dictionary<int, IPet>(); // Тут храним всех наших петов
+
+    public static void StartGame()
+    {
+        SetRarity();
+        RunTimer();
+        CreatePetFinal(PetType.Cat, "Barsik");
+        CreatePetFinal(PetType.Dog, "Sharik");
+        Menu();
+    }
+
 
     // Модуль цикла (таймера) игры
     private static System.Timers.Timer? HungerTimer; // Это таймер
@@ -170,6 +194,47 @@ internal class MyPets
             pet.Happiness = Math.Clamp(pet.Happiness, IPet.minHappiness, IPet.maxHappiness);
         }
     }
+
+
+    public static void SetRarity()
+    {
+        petsRarity.Add(
+            PetRarityLevel.Common, (
+            45, // Шанс выпадения 45%
+            (
+                (1, 3), // min|max Independence
+                (1, 3)  // min|max Gluttony
+            )));
+        petsRarity.Add(
+            PetRarityLevel.UnCommon, (
+            25, // Шанс выпадения 25%
+            (
+                (3, 4), // min|max Independence
+                (3, 4)  // min|max Gluttony
+            )));
+        petsRarity.Add(
+            PetRarityLevel.Rare, (
+            15, // Шанс выпадения 15%
+            (
+                (4, 6), // min|max Independence
+                (4, 6)  // min|max Gluttony
+            )));
+        petsRarity.Add(
+            PetRarityLevel.Epic, (
+            10, // Шанс выпадения 10%
+            (
+                (7, 9), // min|max Independence
+                (7, 9)  // min|max Gluttony
+            )));
+        petsRarity.Add(
+            PetRarityLevel.Legendary, (
+            5, // Шанс выпадения 5%
+            (
+                (8, 11), // min|max Independence
+                (8, 11)  // min|max Gluttony
+            )));
+    }
+
 
     public static void Menu()
     {
@@ -419,77 +484,30 @@ internal class MyPets
     }
     public static PetRarityLevel RollRarityLevel()
     {
-        var rarity = PetRarityLevel.Common;
         var random = new Random().Next(0, 100);
-        switch (random)
+        int cumulativeChance = 0;
+        foreach ( var value in petsRarity)
         {
-            case > 95: // 5%
-                rarity = PetRarityLevel.Legendary;
-                break;
-            case > 85: // 10%
-                rarity = PetRarityLevel.Epic;
-                break;
-            case > 70: // 15%
-                rarity = PetRarityLevel.Rare;
-                break;
-            case > 45: // 25%
-                rarity = PetRarityLevel.UnCommon;
-                break;
-            case > 0: // 45%
-                rarity = PetRarityLevel.Common;
-                break;
+            cumulativeChance += value.Value.chance;
+            if (random < cumulativeChance)
+            {
+                return value.Key;
+            }
         }
-        return rarity;
+        return PetRarityLevel.Common;
     }
     public static (double independence, double gluttony) RollSpecificationsLevel(PetRarityLevel rarity)
     {
         double independence = 0;
         double gluttony = 0;
 
-        int minInd = 0;
-        int maxInd = 0;
+        var setRarity = petsRarity.TryGetValue(rarity, out var setRarityValue);
 
-        int minGlu = 0;
-        int maxGlu = 0;
+        int minInd = setRarityValue.IndAndGlu.Independence.minIndependence;
+        int maxInd = setRarityValue.IndAndGlu.Independence.maxIndependence;
 
-        switch (rarity)
-        {
-            case PetRarityLevel.Common:
-                minInd = 1;
-                maxInd = 3;
-
-                minGlu = 1;
-                maxGlu = 3;
-                break;
-            case PetRarityLevel.UnCommon:
-                minInd = 3;
-                maxInd = 4;
-
-                minGlu = 3;
-                maxGlu = 4;
-                break;
-            case PetRarityLevel.Rare:
-                minInd = 4;
-                maxInd = 6;
-
-                minGlu = 4;
-                maxGlu = 6;
-                break;
-            case PetRarityLevel.Epic:
-                minInd = 7;
-                maxInd = 9;
-
-                minGlu = 7;
-                maxGlu = 9;
-                break;
-            case PetRarityLevel.Legendary:
-                minInd = 8;
-                maxInd = 11;
-
-                minGlu = 8;
-                maxGlu = 11;
-                break;
-        }
+        int minGlu = setRarityValue.IndAndGlu.Gluttony.minGluttony;
+        int maxGlu = setRarityValue.IndAndGlu.Gluttony.maxGluttony;
 
         var random = new Random();
 
